@@ -17,7 +17,11 @@
   <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
 </head>
 <body>
-  <a-scene>
+  <a-scene vr-mode-ui="enabled: true">
+    <!-- Controller -->
+    <a-entity laser-controls="hand: left" raycaster="objects: .collidable; far: 5"></a-entity>
+    <a-entity laser-controls="hand: right" raycaster="objects: .collidable; far: 5"></a-entity>
+
     <!-- 最初は非表示(visible="false")にしておく -->
     <a-entity
       id="myModel"
@@ -49,6 +53,16 @@
   
   <script>
     document.addEventListener('DOMContentLoaded', function () {
+      // 【追加】A-Frameシーンの準備完了を待ってからVRモードに切り替え
+      const sceneEl = document.querySelector('a-scene');
+      sceneEl.addEventListener('loaded', function () {
+        console.log('A-Frameシーンが読み込まれました。VRモードボタンを有効化します。');
+        // VRモード自動切り替えは削除し、ユーザーがボタンで入れるようにする
+        // if (sceneEl.enterVR) {
+        //   sceneEl.enterVR();
+        // }
+      });
+
       const modelEl = document.getElementById('myModel');
       const skyEl = document.getElementById('sky');
       const bgmEl = document.getElementById('bgm');
@@ -66,6 +80,7 @@
       
       // クリック/タップでスタート
       document.addEventListener('click', startExperience);
+      sceneEl.addEventListener('triggerdown', startExperience);
       
       function startExperience() {
         if (hasStarted) return; // 二重実行防止
@@ -73,6 +88,7 @@
         
         // クリックイベントリスナーを削除
         document.removeEventListener('click', startExperience);
+        sceneEl.removeEventListener('triggerdown', startExperience);
         
         console.log('ユーザーアクションを検出しました。BGMを開始します。');
         bgmEl.components.sound.playSound();
@@ -84,15 +100,15 @@
           // モデルを表示状態に変更
           modelEl.setAttribute('visible', true);
 
-          //アニメーション1を設定（anime01 , 繰り返し回数2回  再生速度1.15倍）
-          modelEl.setAttribute('animation-mixer', {clip: 'anime01',loop: 'false',repetitions: '2',timeScale: '1.15',clampWhenFinished: 'true'});
-          //アニメーション1の初期表示位置の設定
+          // アニメーション1は動かさない（animation-mixer属性を削除または空にする）
+          modelEl.removeAttribute('animation-mixer');
+          // アニメーション1の初期表示位置の設定
           modelEl.setAttribute('position', '0 -1.5 -5');
-          //アニメーション1で移動させる先の座標(0,-1.5,-1)と移動時間の設定8.0秒
+          // アニメーション1で移動させる先の座標(0,-1.5,-2)と移動時間の設定8.0秒
           modelEl.setAttribute('animation__position', 'property: position; to: 0 -1.5 -2; dur: 8000; easing: easeInSine; loop: false');          
 
-          // sound01を再生
-          sound1El.components.sound.playSound();
+          // sound02を再生（アニメーション1にサウンド2を割り当て）
+          sound2El.components.sound.playSound();
           
           // アニメーション開始から30秒後に自動的にページ遷移
           setTimeout(function() {
@@ -108,33 +124,33 @@
             console.log('アニメーション2(anime02)に切り替えます');
             //アニメーション2を設定（anime02 , 繰り返し回数2回）
             modelEl.setAttribute('animation-mixer', {clip: 'anime02',loop: 'false',repetitions: '2',timeScale: '1',clampWhenFinished: 'true'});
-            // sound02を再生
-            sound2El.components.sound.playSound();
+            // sound01を再生（sound2El → sound1El に変更）
+            sound1El.components.sound.playSound();
             
-            // さらに7.9秒後にanime03に切り替え
+            // さらに7.0秒後にanime03に切り替え
             setTimeout(function () {
-              // sound02を停止
-              sound2El.components.sound.stopSound();
+              // sound01を停止
+              sound1El.components.sound.stopSound();
 
               console.log('アニメーション3(anime03)に切り替えます');
-              //アニメーション2を設定（anime03 , 繰り返し回数3回）
-              modelEl.setAttribute('animation-mixer', {clip: 'anime03',loop: 'false',repetitions: '3',timeScale: '1',clampWhenFinished: 'true'});              
-              // sound03を再生
+              //アニメーション3を設定（anime03 , 繰り返し回数1回、再生速度1.2倍）
+              modelEl.setAttribute('animation-mixer', {clip: 'anime03',loop: 'false',repetitions: '1',timeScale: '1.2',clampWhenFinished: 'true'});              
+              // sound3を再生
               sound3El.components.sound.playSound();
               
-              // さらに8.4秒後にanime04に切り替え
+              // さらに5.6秒後にanime04に切り替え
               setTimeout(function () {
-                // sound03を停止
+                // sound3を停止
                 sound3El.components.sound.stopSound();
 
                 console.log('アニメーション4(anime04)に切り替えます');
-                //アニメーション2を設定（anime04 , 繰り返し回数1回）
+                //アニメーション4を設定（anime04 , 繰り返し回数1回）
                 modelEl.setAttribute('animation-mixer', {clip: 'anime04',loop: 'false',repetitions: '1',timeScale: '1',clampWhenFinished: 'true'});                
                 // sound04を再生
                 sound4El.components.sound.playSound();
-              }, 8400); // 8.4秒後　anime04表示
+              }, 5600); // 5.6秒後　anime04表示
               
-            }, 7900); // 7.9秒後　anime03表示
+            }, 7000); // 7.0秒後　anime03表示
             
           }, 8000); // 8.0秒後　anime02表示
           
