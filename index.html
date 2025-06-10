@@ -53,14 +53,13 @@
   
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      // 【追加】A-Frameシーンの準備完了を待ってからVRモードに切り替え
+
       const sceneEl = document.querySelector('a-scene');
       sceneEl.addEventListener('loaded', function () {
-        console.log('A-Frameシーンが読み込まれました。VRモードボタンを有効化します。');
-        // VRモード自動切り替えは削除し、ユーザーがボタンで入れるようにする
-        // if (sceneEl.enterVR) {
-        //   sceneEl.enterVR();
-        // }
+        console.log('A-Frameシーンが読み込まれました。VRモードに切り替えます。');
+        if (sceneEl.enterVR) {
+          sceneEl.enterVR();
+        }
       });
 
       const modelEl = document.getElementById('myModel');
